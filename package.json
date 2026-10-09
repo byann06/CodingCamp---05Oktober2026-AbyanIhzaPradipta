@@ -1,0 +1,15 @@
+{
+  "name": "life-dashboard",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Life Dashboard — Vanilla HTML/CSS/JS halaman web mandiri",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "fast-check": "3.22.0",
+    "jsdom": "25.0.1",
+    "vitest": "2.1.9"
+  }
+}

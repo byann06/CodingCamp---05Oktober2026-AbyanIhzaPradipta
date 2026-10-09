@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Life Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Anti-flash: baca tema dari localStorage dan terapkan class sebelum render.
+       Exception dari aturan no-inline-script (diizinkan per design.md).
+       Hanya satu baris operasi DOM; tidak ada logika bisnis di sini. -->
+  <script>
+    (function () {
+      try {
+        var rawTheme = localStorage.getItem('ld_theme');
+        var theme = rawTheme === null ? null : JSON.parse(rawTheme);
+        if (theme === 'light') {
+          document.documentElement.classList.add('light');
+        } else {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Header: tombol toggle tema -->
+  <header id="site-header">
+    <h1>Life Dashboard</h1>
+    <button
+      id="theme-toggle"
+      type="button"
+      aria-label="Ganti mode tampilan"
+      title="Ganti mode tampilan"
+    >
+      🌙
+    </button>
+  </header>
+
+  <!-- Banner peringatan: localStorage tidak tersedia (tersembunyi secara default) -->
+  <div id="storage-warning" role="alert" hidden>
+    Peringatan: penyimpanan lokal tidak tersedia di browser ini. Data tidak akan tersimpan selama sesi ini.
+  </div>
+
+  <!-- Toast notifikasi: data localStorage rusak (tersembunyi secara default) -->
+  <div id="data-corrupt-toast" role="status" hidden>
+    Beberapa data sebelumnya tidak dapat dipulihkan karena rusak. Widget dimulai dengan data kosong.
+  </div>
+
+  <main id="dashboard">
+
+    <!-- Widget 1: Clock -->
+    <section id="clock-widget" aria-labelledby="clock-heading">
+      <h2 id="clock-heading" class="sr-only">Jam dan Tanggal</h2>
+      <div id="clock-time" aria-live="polite" aria-label="Waktu saat ini">00:00:00</div>
+      <div id="clock-date" aria-live="polite" aria-label="Tanggal saat ini"></div>
+    </section>
+
+    <!-- Widget 2: Greeting -->
+    <section id="greeting-widget" aria-labelledby="greeting-heading">
+      <h2 id="greeting-heading" class="sr-only">Salam Personal</h2>
+      <p id="greeting-text" aria-live="polite">Selamat Datang!</p>
+      <form id="username-form" aria-label="Atur nama kustom">
+        <label for="username-input">Nama kamu:</label>
+        <input
+          type="text"
+          id="username-input"
+          name="username"
+          placeholder="Masukkan namamu..."
+          maxlength="100"
+          autocomplete="off"
+        />
+        <button type="submit" id="username-save-btn">Simpan</button>
+        <span id="username-error" role="alert" aria-live="assertive"></span>
+      </form>
+    </section>
+
+    <!-- Widget 3: Focus Timer -->
+    <section id="timer-widget" aria-labelledby="timer-heading">
+      <h2 id="timer-heading">Timer Fokus</h2>
+      <div id="timer-display" aria-live="polite" aria-label="Waktu tersisa">25:00</div>
+      <div id="timer-complete-indicator" hidden aria-live="assertive">
+        Sesi fokus selesai! 🎉
+      </div>
+      <div id="timer-controls">
+        <button type="button" id="timer-start-btn" aria-label="Mulai timer">Mulai</button>
+        <button type="button" id="timer-stop-btn" aria-label="Hentikan timer" disabled>Berhenti</button>
+        <button type="button" id="timer-reset-btn" aria-label="Reset timer">Reset</button>
+      </div>
+    </section>
+
+    <!-- Widget 4: To-Do List -->
+    <section id="todo-widget" aria-labelledby="todo-heading">
+      <h2 id="todo-heading">To-Do List</h2>
+      <form id="todo-add-form" aria-label="Tambah tugas baru">
+        <label for="todo-input">Tugas baru:</label>
+        <input
+          type="text"
+          id="todo-input"
+          name="todo-text"
+          placeholder="Tulis tugas baru..."
+          maxlength="200"
+          autocomplete="off"
+        />
+        <button type="submit" id="todo-add-btn" aria-label="Tambah tugas">Tambah</button>
+        <span id="todo-input-error" role="alert" aria-live="assertive"></span>
+      </form>
+      <div id="todo-sort-controls" aria-label="Pengurutan daftar tugas">
+        <label for="todo-sort-select">Urutkan:</label>
+        <select id="todo-sort-select" aria-label="Pilih urutan tugas">
+          <option value="oldest">Terlama</option>
+          <option value="newest">Terbaru</option>
+          <option value="status">Status (belum selesai dulu)</option>
+        </select>
+      </div>
+      <ul id="todo-list" aria-label="Daftar tugas" aria-live="polite">
+        <!-- Tugas di-render oleh js/todo.js -->
+      </ul>
+    </section>
+
+    <!-- Widget 5: Quick Links -->
+    <section id="quicklinks-widget" aria-labelledby="quicklinks-heading">
+      <h2 id="quicklinks-heading">Quick Links</h2>
+      <div id="quick-links-container" aria-label="Daftar tautan cepat">
+        <!-- Tombol link di-render oleh js/quicklinks.js -->
+      </div>
+      <p id="quicklinks-limit-msg" hidden>Batas maksimal 20 tautan tercapai.</p>
+      <form id="quicklinks-add-form" aria-label="Tambah tautan cepat baru">
+        <div>
+          <label for="quicklinks-label-input">Label:</label>
+          <input
+            type="text"
+            id="quicklinks-label-input"
+            name="link-label"
+            placeholder="Contoh: GitHub"
+            maxlength="50"
+            autocomplete="off"
+          />
+          <span id="quicklinks-label-error" role="alert" aria-live="assertive"></span>
+        </div>
+        <div>
+          <label for="quicklinks-url-input">URL:</label>
+          <input
+            type="url"
+            id="quicklinks-url-input"
+            name="link-url"
+            placeholder="https://..."
+            autocomplete="off"
+          />
+          <span id="quicklinks-url-error" role="alert" aria-live="assertive"></span>
+        </div>
+        <button type="submit" id="quicklinks-add-btn" aria-label="Tambah tautan cepat">Tambah Link</button>
+      </form>
+    </section>
+
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
